@@ -4,9 +4,9 @@ path = '/Users/liangzhong/projects/csv2tripple'
 file = path + '/' + 'a.csv'
 
 
-# with open(file_1) as f:
+# with open(file) as f:
 #     head_1 = f.readline()
-#     print(head_1)
+#     # print(head_1)
 #     h1 = head_1.split(",")
 #     line_1 = f.readline()
 #     l1 = line_1.split(",")
