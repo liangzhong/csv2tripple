@@ -3,5 +3,6 @@ RESOURCE_TYPE={
 }
 
 DCTERMEXTENT={
-    '1 online resource (1 photo: color)':'1 color photograph'
+    '1 online resource (1 photo: color)':'1 color photograph',
+    '1 online resource ( 1 photo: color)':'1 color photograph'
 }

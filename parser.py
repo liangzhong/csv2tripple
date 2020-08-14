@@ -42,9 +42,6 @@ def convert_row(row):
     dic={}
 
     def providedCHO_dcSubjects(row):
-        # xml="""
-        #     <dc:subject>%s</dc:subject>
-        #     """ % (row[14])
         xml=""
         dic[row[40]] = row[41]
         dic[row[42]] = row[43]
@@ -83,12 +80,12 @@ def convert_row(row):
         </skos:concept>
         """ % (row[8], row[7])
     
-    def skos_concept_edmcurrentlocation(row):
-        return """
-        <skos:concept rdf:about="%s" >   
-            <skos:prefLabel xml:lang="en">%s</skos:prefLabel>
-        </skos:concept>
-        """ % (row[36], row[35])    
+    # def skos_concept_edmcurrentlocation(row):
+    #     return """
+    #     <skos:concept rdf:about="%s" >   
+    #         <skos:prefLabel xml:lang="en">%s</skos:prefLabel>
+    #     </skos:concept>
+    #     """ % (row[36], row[35])    
 
     def skos_concetp_dcsubject(dic):
         xml = ""
@@ -101,27 +98,70 @@ def convert_row(row):
                """ % (dic[k], k)
         return xml    
 
-    def convert_rdfDescription(url):
+    def edm_taxon(row):
+        xml=""
+        if row[24]:
+            dic[row[23]] = "http://www.wikidata.org/entity/" + row[24]
+            xml += """<dwc:phylum rdf:resource="http://www.wikidata.org/entity/%s"/>
+            """ % (row[24])
+        else:
+            xml += """<dwc:phylum>%s</dwc:phylum>
+            """ % (row[23])
+
+        if row[26]:
+            dic[row[25]] = "http://www.wikidata.org/entity/" + row[26]
+            xml += """<dwc:class rdf:resource="http://www.wikidata.org/entity/%s"/>
+            """ % (row[26])
+        else:
+            xml += """<dwc:class>%s</dwc:class>
+            """ % (row[25])
+
+        if row[28]:
+            dic[row[27]] = "http://www.wikidata.org/entity/" + row[28]
+            xml += """<dwc:order rdf:resource="http://www.wikidata.org/entity/%s"/>
+            """ % (row[28])
+        else:
+            xml += """<dwc:>%s</dwc:>
+            """ % (row[27])
+
+        if row[30]:
+            dic[row[29]] = "http://www.wikidata.org/entity/" + row[30]
+            xml += """<dwc:family rdf:resource="http://www.wikidata.org/entity/%s"/>
+            """ % (row[30])
+        else:
+            xml += """<dwc:family>%s</dwc:family>
+            """ % (row[29])
+            
+        if row[32]:
+            dic[row[31]] = "http://www.wikidata.org/entity/" + row[32]
+            xml += """<dwc:genus rdf:resource="http://www.wikidata.org/entity/%s"/>
+            """ % (row[32])
+        else:
+            xml += """<dwc:genus>%s</dwc:genus>
+            """ % (row[31])
+
+        if row[34]:
+            dic[row[33]] = "http://www.wikidata.org/entity/" + row[34]
+            xml += """<dwc:subgenus rdf:resource="http://www.wikidata.org/entity/%s"/>""" % (row[34])
+        else:
+            xml += """<dwc:subgenus>%s</dwc:subgenus>""" % (row[33])
+        return xml    
+
+    def convert_rdfDescription(url, edm_taxon):
         return"""
         <dwc:Organism rdf:about="%s">
             <dwc:vernacularName>%s</dwc:vernacularName>
         </dwc:Organism>
         <dwc:taxon rdf:about="%s">
-            <dwc:kingdom>%s</dwc:kingdom>
-            <dwc:phylum>%s</dwc:phylum>
-            <dwc:class>%s</dwc:class>
-            <dwc:order>%s</dwc:order>
-            <dwc:family>%s</dwc:family>
-            <dwc:genus>%s</dwc:genus>
-            <dwc:subgenus>%s</dwc:subgenus>
+            <dwc:kingdom>%s</dwc:kingdom>%s
         </dwc:taxon>
-    """ %(url, row[20], url, row[22], row[23], row[25], row[27], row[29], row[31], row[33])
+        """ %(url, row[20], url, row[22], edm_taxon)
 
     def edm_WebResource(url):
         return """
         <edm:WebResource rdf:about="%s">
             <edm:rights>TBD</edm:rights>
-            <dcterms:type>%s</dcterms:type>
+            <edm:type>%s</edm:type>
         </edm:WebResource>
         """ %(url, constant.RESOURCE_TYPE[str(row[9]).lower()])
 
@@ -132,20 +172,20 @@ def convert_row(row):
             <edm:dataProvider>%s</edm:dataProvider>
             <edm:isShownAt rdf:resource="%s" />
             <edm:datasetName>%s</edm:datasetName>
-        </ore:Aggregation>
-    """ %(url, url, row[35], url, row[6])
+        </ore:Aggregation>""" %(url, url, row[35], url, row[6])
 
     ####### top function #########    
     url = url_format(row[4])
     providedCHO_subjects = providedCHO_dcSubjects(row)
     provodedCHO = convert_providedCHO(row, url, providedCHO_subjects)
+    edm_taxons = edm_taxon(row)
+    rdfDescription = convert_rdfDescription(url, edm_taxons)
     skos_concetp_dccreater = skos_concept_dccreator(row)
     skos_concetp_dcsubjects = skos_concetp_dcsubject(dic)
-    # skos_concept_edmcurrentlocation = skos_concept_edmcurrentlocation(row)
-    rdfDescription = convert_rdfDescription(url)
     edm_webResource = edm_WebResource(url)
     ore_aggregation = ore_Aggregation(url)
-    xml = provodedCHO + skos_concetp_dccreater + skos_concetp_dcsubjects + skos_concept_edmcurrentlocation + rdfDescription + edm_webResource + ore_aggregation
+    xml = provodedCHO + rdfDescription + skos_concetp_dccreater + skos_concetp_dcsubjects + edm_webResource + ore_aggregation
+    
     return xml
 
 
